@@ -2,6 +2,15 @@ import csv
 
 
 def default_movies(file_name):
+    """ Creates the information of the default movies in CSV format.
+
+    Args:
+         file_name(str): File name in csv format
+
+    Returns:
+        movies(tabular): Table of movies in csv format
+    """
+
     movies = [
         ["title", "rating", "year", "poster url", "imdb_link", "flag", "genre"],
         ["The Shawshank Redemption", 9.5, 1994, "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg", "https://www.imdb.com/title/tt0111161/?ref_=nv_sr_srsg_0_tt_7_nm_1_q_The%2520Shawsha", "https://flagsapi.com/US/shiny/64.png", "https://api-ninjas-data.s3.us-west-2.amazonaws.com/emojis/U%2B1F62D.png"],

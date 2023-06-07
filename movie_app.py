@@ -13,7 +13,6 @@ import random
 import matplotlib.pyplot as plt
 
 
-
 class MovieApp:
     """Movie app class represents a movie application"""
     def __init__(self, storage):

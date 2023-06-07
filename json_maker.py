@@ -2,6 +2,15 @@ import json
 
 
 def default_movies(file_name):
+    """ Creates the information of the default movies in JSON format.
+
+    Args:
+        file_name(str): File name in json format
+
+    Returns:
+        movies(dict): Dictionary movies in json format
+    """
+
     movies = {
         "The Shawshank Redemption": {"rating": 9.5, "year": 1994,
                                      "poster url": "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
