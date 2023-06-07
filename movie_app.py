@@ -11,7 +11,7 @@ import sys
 import requests
 import random
 import matplotlib.pyplot as plt
-from fuzzywuzzy import fuzz
+
 
 
 class MovieApp:
@@ -27,7 +27,7 @@ class MovieApp:
         sys.exit()
 
     def _command_list_movies(self):
-        """ Displays the dictionary of movies[key] and its rating(value). """
+        """ Displays the dictionary of movies. """
         movies = self._storage.list_movies()
         print(f"{len(movies)} movies in total")
         for key, value in movies.items():
@@ -44,11 +44,11 @@ class MovieApp:
             movie = requests.get(add_url)
             res = movie.json()
             rating_values = [float(rating['Value'][0][:3]) for rating in res['Ratings']]
-            rating = rating_values[0]
+            rating = float(rating_values[0])
             movie_title = res["Title"]
-            year = res["Year"]
+            year = int(res["Year"])
             poster = res["Poster"]
-            self._storage.add_movie(movie_title, year, rating, poster)
+            self._storage.add_movie(movie_title, int(year), float(rating), poster)
             print(f"\033[34m Movie {title} successfully added. \033[0m")
         except KeyError:
             print("Sorry, movie title does not exist!")
@@ -124,36 +124,7 @@ class MovieApp:
                 print(f"{movie}, {rating}")
         else:
             print(f"The search term {movie_name} is not found")
-            self.search_movie_distance(movie_name)
-
-    def search_movie_distance(self, movie_name):
-        """ Search for a matching movie title
-
-         Args:
-            movie_name(str): Input user for searching term
-
-        """
-        movies = self._storage.list_movies()
-        close_movie_match = []
-        for movie, stat in movies.items():
-            ratio = fuzz.token_set_ratio(movie_name.lower(), movie.lower())
-            if ratio >= 45:
-                close_movie_match.append((movie, stat["rating"]))
-        if close_movie_match:
-            close_movie_match.sort(key=lambda x: x[1], reverse=True)
-            print(f"The movie {movie_name} does not exist. Did you mean: ")
-            for movie, rating in close_movie_match:
-                print(f"{movie}")
-            validation = input("Press 'Y' for Yes and 'N' for No: ")
-            if validation == "Y":
-                for movie, rating in close_movie_match:
-                    print(f"{movie}, {rating}")
-            elif validation == "N":
-                print(f"Sorry, the movie '{movie_name}' doesn't exist")
-            else:
-                print("Sorry wrong input")
-        else:
-            print(f"Sorry, the movie '{movie_name}' doesn't exist")
+            # self.search_movie_distance(movie_name)
 
     def sorted_movie(self):
         """ Sorts the movie title[key] based on its rating(value) in descending order. """
@@ -271,7 +242,7 @@ class MovieApp:
         """
         Displays a menu and allows the user to choose from a list of options.
         """
-        while True:
+        try:
             print("\033[36m Menu:\n0. Exit\n1. List movies\n2. Add movie\n3. Delete movie\n"
                   "4. Update movie\n5. Stats\n6. Random movie\n7. Search movie\n"
                   "8. Movies sorted by rating\n9. Creating Rating Histogram\n"
@@ -300,6 +271,9 @@ class MovieApp:
             else:
                 print("\033[31m" + "Error! Please choose from numbers 0 to 10." + "\033[0m")
                 self.run()
+        except ValueError:
+            print("\033[31m" + "Error! Please choose from numbers 0 to 10." + "\033[0m")
+            self.run()
 
 
 """Use to test the code."""

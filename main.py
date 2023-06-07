@@ -1,11 +1,23 @@
+import sys
 from storage_json import StorageJson
-from OOP_MovieApp.movie_app import MovieApp
+from storage_csv import StorageCsv
+from movie_app import MovieApp
 
 
 def main():
     """It contains the main function of the program."""
-    # Create a StorageJson object
-    storage = StorageJson("movies.csv")
+    if len(sys.argv) < 2:
+        print("Usage: python3 main.py <storage_file>")
+        return
+    storage_file = sys.argv[1]
+
+    if storage_file.endswith(".json"):
+        storage = StorageJson(storage_file)
+    elif storage_file.endswith(".csv"):
+        storage = StorageCsv(storage_file)
+    else:
+        print("Unsupported storage file format.")
+        return None
 
     # Create a MovieApp object with the StorageJson object
     movie_app = MovieApp(storage)

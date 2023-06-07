@@ -1,14 +1,14 @@
-
-from OOP_MovieApp.istorage import IStorage
+from istorage import IStorage
 import json
 import requests
 import imdb
-
+import json_maker
 
 class StorageJson(IStorage):
     """A class that provides storage functionality for movies using JSON format."""
 
     def __init__(self, file_path):
+
         self.file_path = file_path
         self.country_dict = {}
 
@@ -20,9 +20,14 @@ class StorageJson(IStorage):
         The function loads the information from the JSON
         file and returns the data.
         """
-        with open(self.file_path, "r") as file_obj:
-            file = json.loads(file_obj.read())
-        return file
+        try:
+            with open(self.file_path, "r") as file_obj:
+                file = json.loads(file_obj.read())
+            return file
+        except FileNotFoundError:
+            print(f"{self.file_path}not found. Please wait while I load default data.")
+            file = json_maker.default_movies(self.file_path)
+            return file
 
     def get_country_code(self):
         """ Creates country code
@@ -177,7 +182,7 @@ class StorageJson(IStorage):
             json.dump(movies, new_info, indent=4, separators=(',', ':'))
 
 
-storage = StorageJson('movies.json')
+# storage = StorageJson('movies.json')
 # print(storage.list_movies())
 # storage.add_movie(title="Titanic", year=1997, rating=7.9, poster="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SX300.jpg")
 # storage.delete_movie("Titanic")

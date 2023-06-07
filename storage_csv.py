@@ -1,25 +1,52 @@
 import csv
-from typing import Dict, Any
-from OOP_MovieApp.istorage import IStorage
-from OOP_MovieApp.movie_app import MovieApp
+from istorage import IStorage
 import requests
-import json
 import imdb
+import csv_maker
 
 
 class StorageCsv(IStorage):
-    def __init__(self, file_path: str):
+    def __init__(self, file_path):
         self.file_path = file_path
         self.country_dict = {}
 
     def list_movies(self):
         """
-        Returns a dictionary of dictionaries that contains the movies information in the database.
-        The function loads the information from the CSV file and returns the data.
+        Returns a dictionary of dictionaries that
+        contains the movies information in the database.
+
+        The function loads the information from the CSV
+        file and returns the data.
         """
-        with open(self.file_path, 'r') as file:
-            reader = csv.DictReader(file)
-            return reader
+        try:
+            movies = {}
+            with open("ashley.csv", 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    title = row['title']
+                    movies[title] = {
+                        "rating": float(row['rating']),
+                        "year": int(row['year']),
+                        "poster url": (row['poster url']),
+                        "imdb_link": (row['imdb_link']),
+                        "flag": (row['flag']),
+                        "genre": (row['genre']),
+                    }
+            return movies
+        except FileNotFoundError:
+            print(f"{self.file_path}not found. Please wait while I load default data.")
+            reader = csv_maker.default_movies(self.file_path)
+            for row in reader:
+                title = row['title']
+                movies[title] = {
+                    "rating": float(row['rating']),
+                    "year": int(row['year']),
+                    "poster url": (row['poster url']),
+                    "imdb_link": (row['imdb_link']),
+                    "flag": (row['flag']),
+                    "genre": (row['genre']),
+                }
+            return movies
 
     def get_country_code(self):
         """ Creates country code
@@ -117,30 +144,16 @@ class StorageCsv(IStorage):
                 genre = dict_of_genre_emoticons[key]
                 movie_genre = self.genre_maker(genre)
 
+        flag = f"https://flagsapi.com/{country_origin}/shiny/64.png"
         try:
-            with open(self.file_path, "r") as file_obj:
-                movies = json.load(file_obj)
-            new_movie = {
-                title: {
-                    "rating": rating,
-                    "year": int(year),
-                    "poster url": poster,
-                    "imdb_link": imdb_url,
-                    "flag": f"https://flagsapi.com/{country_origin}/shiny/64.png",
-                    "genre": movie_genre
-                }
-            }
-            movies.update(new_movie)
+            with open(self.file_path, 'a', newline='') as new_file:
+                writer = csv.writer(new_file)
+                writer.writerow([title, float(rating), int(year), poster, imdb_url, flag, movie_genre])
+
         except KeyError:
             print("Sorry, movie title does not exist!")
         except Exception as e:
-            print(f"Error, API is not accessible. Possible reasons: {e}")
-
-        with open(self.file_path, 'a', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=movies.keys())
-            if file.tell() == 0:
-                writer.writeheader()
-            writer.writerow(movies)
+            print(f"Error! Possible reasons: {e}")
 
     def delete_movie(self, title):
         """
@@ -153,12 +166,11 @@ class StorageCsv(IStorage):
         """
         movies = self.list_movies()
         if title in movies:
-            with open(self.file_path, 'w', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=movies[title].keys())
-                writer.writeheader()
-                del movies[title]
-                for movie in movies.values():
-                    writer.writerow(movie)
+            del movies[title]
+            self.save_movies(movies)
+            print(f"The movie '{title}' has been deleted.")
+        else:
+            print(f"The movie '{title}' does not exist.")
 
     def update_movie(self, title, notes):
         """
@@ -170,17 +182,36 @@ class StorageCsv(IStorage):
             title(str): movie title to update
             notes(str): notes for the movie
         """
+        """
+                Updates a movie's notes in the database based on its title.
+
+                The function loads the movie information from the CSV file,
+                updates the notes of the specified movie entry, and saves the updated data back to the file.
+                """
         movies = self.list_movies()
         if title in movies:
             movies[title]['notes'] = notes
-            fieldnames = ['title', 'year', 'rating', 'poster', 'notes']
-            with open(self.file_path, 'w', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=fieldnames)
-                writer.writeheader()
-                for movie in movies.values():
-                    writer.writerow(movie)
+            self.save_movies(movies)
+            print(f"The notes for the movie '{title}' have been updated.")
+        else:
+            print(f"The movie '{title}' does not exist.")
+
+    def save_movies(self, movies):
+        """
+        Saves the movie information to the CSV file.
+
+        The function takes a dictionary of dictionaries representing the movie data,
+        converts it to a list of dictionaries, and writes it to the CSV file.
+        """
+        fieldnames = ['title', 'rating', 'year', 'poster url', 'imdb_link', 'flag', 'genre']
+        rows = [movies[title] for title in movies]
+
+        with open(self.file_path, 'w', newline='') as new_file:
+            writer = csv.DictWriter(new_file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
 
 
-storage = StorageCsv('movies.csv')
-movie_app = MovieApp(storage)
-movie_app.run()
+# storage = StorageCsv('movies.csv')
+# movie_app = MovieApp(storage)
+# movie_app.run()
